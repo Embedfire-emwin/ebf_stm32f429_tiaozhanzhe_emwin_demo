@@ -1,0 +1,37 @@
+使用之前：
+为在emWin界面上显示中文，需要特殊格式的字库文件，我们把字库文件烧写在SPI Flash存储空间上，具体步骤如下：
+(1) 制作外部Flash文件系统：运行“01. FatFS_SPIFlash”工程，
+    在外部SPI Flash上制作FatFs文件系统。
+	
+(2) 将外部SPI Flash文件系统模拟U盘：运行“02. 模拟U盘_SPIFlash”工程，
+     利用模拟U盘将“烧写文件”文件夹下的文件直接拷贝到外部SPI Flash文件系统根目录下。
+	 
+(3) 字库烧写：运行“03. Write_FontLIB_SPIFlash”工程，运行时串口会打印相关
+    信息。其中：GB2312_H2424.FON字库文件是为裸机程序显示中文提供的，可选烧写。UNIGBK.BIN字库是文件系统
+    需要，必须烧写；新宋体25.xbf和新宋体19.xbf字库是宋体，emWin使用，两个文件包括的字库大小不同而已。
+	  sd8782_uapsta.bin文件是wifi模块使用。
+注意：
+(1) 音乐播放器默认读取SD卡里边音频文件，支持mp3，wav格式音频文件。所以，使用音乐播放器之前必须将音频文件拷
+	贝至SD卡中，否则读取不到文件。录音应用亦是相同情况。
+	
+(2) 图片显示的相关文件必须放在外部SPI Flash文件系统的Picture文件夹内，不然系统找寻不到。
+
+(3) 系统不具备文件删除功能，所以有需要删除文件的，可利用模拟U盘例程，这样可以直接在电脑端实现删除。当然拷贝
+	文件方法相同。
+	
+(4) 如果所有例程液晶的中文显示出现乱码情况请按“00. 使用emWin例程之前必须先烧写字库”步骤重新烧写字库。
+	
+  秉火F429至尊版              2015/11/12
+
+
+论坛    :http://www.chuxue123.com
+淘宝    :http://firestm32.taobao.com
+邮箱	:wildfireteam@163.com
+
+
+
+Wildfire STM32 ISO development board program. 
+
+forum    :http://www.chuxue123.com
+shop	 :http://firestm32.taobao.com
+email	 :wildfireteam@163.com

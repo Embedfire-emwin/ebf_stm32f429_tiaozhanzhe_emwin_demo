@@ -20,14 +20,15 @@
 *
 *       H/V front/backporch and synchronization width/height
 */
-#define HBP  24
-#define VBP   3
+/*根据液晶数据手册的参数配置*/
+#define HBP  46		//HSYNC后的无效像素
+#define VBP  23		//VSYNC后的无效行数
 
-#define HSW   6
-#define VSW   1
+#define HSW   1		//HSYNC宽度
+#define VSW   1		//VSYNC宽度
 
-#define HFP  10
-#define VFP   4
+#define HFP  22		//HSYNC前的无效像素
+#define VFP   22		//VSYNC前的无效行数
 
 /* LCD Size (Width and Height) */
 #define  LCD_PIXEL_WIDTH        ((uint16_t)800)

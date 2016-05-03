@@ -145,8 +145,9 @@ static  void  AppTaskStart (void *p_arg)
 	OS_ERR      err;
  (void)p_arg;
  
-	BSP_Init();                                                 /* Initialize BSP functions                             */
 	CPU_Init();                                                 /* Initialize the uC/CPU services                       */
+
+	BSP_Init();                                                 /* Initialize BSP functions                             */
 
 #if OS_CFG_STAT_TASK_EN > 0u
 	OSStatTaskCPUUsageInit(&err);                               /* Compute CPU capacity with no task running            */

@@ -250,24 +250,24 @@ void LCD_Init(void)
  {
  }
 
- /* Timing configuration */
- /* Configure horizontal synchronization width */
- LTDC_InitStruct.LTDC_HorizontalSync =HSW;
- /* Configure vertical synchronization height */
- LTDC_InitStruct.LTDC_VerticalSync = VSW;
- /* Configure accumulated horizontal back porch */
- LTDC_InitStruct.LTDC_AccumulatedHBP =HBP;
- /* Configure accumulated vertical back porch */
- LTDC_InitStruct.LTDC_AccumulatedVBP = VBP;
- /* Configure accumulated active width */
- LTDC_InitStruct.LTDC_AccumulatedActiveW = LCD_PIXEL_WIDTH+HBP;
- /* Configure accumulated active height */
- LTDC_InitStruct.LTDC_AccumulatedActiveH = LCD_PIXEL_HEIGHT+VBP;
- /* Configure total width */
- LTDC_InitStruct.LTDC_TotalWidth =LCD_PIXEL_WIDTH + HBP + HFP; 
- /* Configure total height */
- LTDC_InitStruct.LTDC_TotalHeigh =LCD_PIXEL_HEIGHT + VBP + VFP;
-
+  /* 时间参数配置 */  
+ /* 配置行同步信号宽度(HSW-1) */
+ LTDC_InitStruct.LTDC_HorizontalSync =HSW-1;
+ /* 配置垂直同步信号宽度(VSW-1) */
+ LTDC_InitStruct.LTDC_VerticalSync = VSW-1;
+ /* 配置(HSW+HBP-1) */
+ LTDC_InitStruct.LTDC_AccumulatedHBP =HSW+HBP-1;
+ /* 配置(VSW+VBP-1) */
+ LTDC_InitStruct.LTDC_AccumulatedVBP = VSW+VBP-1;
+ /* 配置(HSW+HBP+有效像素宽度-1) */
+ LTDC_InitStruct.LTDC_AccumulatedActiveW = HSW+HBP+LCD_PIXEL_WIDTH-1;
+ /* 配置(VSW+VBP+有效像素高度-1) */
+ LTDC_InitStruct.LTDC_AccumulatedActiveH = VSW+VBP+LCD_PIXEL_HEIGHT-1;
+ /* 配置总宽度(HSW+HBP+有效像素宽度+HFP-1) */
+ LTDC_InitStruct.LTDC_TotalWidth =HSW+ HBP+LCD_PIXEL_WIDTH  + HFP-1; 
+ /* 配置总高度(VSW+VBP+有效像素高度+VFP-1) */
+ LTDC_InitStruct.LTDC_TotalHeigh =VSW+ VBP+LCD_PIXEL_HEIGHT  + VFP-1;
+ 
  LTDC_Init(&LTDC_InitStruct);
 }
 

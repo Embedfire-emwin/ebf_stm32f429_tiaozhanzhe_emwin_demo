@@ -3,15 +3,15 @@
 
 #include "stm32f4xx.h"
 
-#define EXTI_INT_GPIO_PORT                GPIOA
-#define EXTI_INT_GPIO_CLK                 RCC_AHB1Periph_GPIOA
-#define EXTI_INT_GPIO_PIN                 GPIO_Pin_8
-#define EXTI_INT_EXTI_PORTSOURCE          EXTI_PortSourceGPIOA
-#define EXTI_INT_EXTI_PINSOURCE           EXTI_PinSource8
-#define EXTI_INT_EXTI_LINE                EXTI_Line8
-#define EXTI_INT_EXTI_IRQ                 EXTI9_5_IRQn
+#define EXTI_INT_GPIO_PORT                GPIOI
+#define EXTI_INT_GPIO_CLK                 RCC_AHB1Periph_GPIOI
+#define EXTI_INT_GPIO_PIN                 GPIO_Pin_1
+#define EXTI_INT_EXTI_PORTSOURCE          EXTI_PortSourceGPIOI
+#define EXTI_INT_EXTI_PINSOURCE           EXTI_PinSource1
+#define EXTI_INT_EXTI_LINE                EXTI_Line1
+#define EXTI_INT_EXTI_IRQ                 EXTI1_IRQn
 
-#define EXTI_IRQHandler                   EXTI9_5_IRQHandler
+#define EXTI_IRQHandler                   EXTI1_IRQHandler
 
 void EXTI_MPU_Config(void);
 void EXTI_MPU_STOP(void);

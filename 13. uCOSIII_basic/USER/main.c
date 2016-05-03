@@ -144,9 +144,10 @@ static  void  AppTaskStart (void *p_arg)
 {
     OS_ERR      err;
    (void)p_arg;
+   
+		CPU_Init();                                                 /* Initialize the uC/CPU services                       */
 
     BSP_Init();                                                 /* Initialize BSP functions                             */
-    CPU_Init();                                                 /* Initialize the uC/CPU services                       */
 
 #if OS_CFG_STAT_TASK_EN > 0u
     OSStatTaskCPUUsageInit(&err);                               /* Compute CPU capacity with no task running            */
@@ -189,7 +190,7 @@ static  void  AppTaskStart (void *p_arg)
                       &err);
 				}
 				BEEP_OFF;
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,
+        OSTimeDlyHMSM(0u, 0u, 0u, 50u,
                       OS_OPT_TIME_HMSM_STRICT,
                       &err);
     }

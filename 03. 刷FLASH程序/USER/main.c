@@ -24,6 +24,8 @@
 #include "./Bsp/usart/bsp_debug_usart.h"
 #include "ff.h"
 #include "./fatfs/drivers/fatfs_flash_spi.h"
+#include "aux_data.h"
+
 
 #define USE_SPI_FLASH        0
 
@@ -37,10 +39,10 @@
   *                              定义变量
   ******************************************************************************
   */
-FIL fnew;													/* file objects */
-FATFS fs;													/* Work area (file system object) for logical drives */
-FRESULT result; 
-UINT  bw;            					    /* File R/W count */
+extern FIL fnew;													/* file objects */
+extern FATFS fs;													/* Work area (file system object) for logical drives */
+extern FRESULT result; 
+extern UINT  bw;            					    /* File R/W count */
 
 /*
 *********************************************************************************************************
@@ -88,6 +90,7 @@ static void KEY1_INIT(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
+
 /**
   * @brief  主函数
   * @param  无
@@ -97,253 +100,30 @@ static void KEY1_INIT(void)
   */
 int main(void)
 {
-	uint32_t write_addr=0,j=0;
-	uint8_t tempbuf[256]={0};
+  FRESULT res;
+  
 	BL8782_PDN_INIT();
 	/* 初始化LED */
-	LED_GPIO_Config();
+  LED_GPIO_Config();
   KEY1_INIT();
-  
-	/* 初始化调试串口，一般为串口1 */
-	Debug_USART_Config();
-	
+
+  /* 初始化调试串口，一般为串口1 */
+  Debug_USART_Config();
+  TM_FATFS_FLASH_SPI_disk_initialize();
+
+    
   printf("\r\n 按一次KEY1开始烧写字库 \r\n"); 
   
   while(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0)==0);
-  while(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0)==1);
+  while(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0)==1); 
 
-#if USE_SPI_FLASH==0
-	TM_FATFS_FLASH_SPI_disk_initialize();
-#endif //#if USE_SPI_FLASH==0
-  
-/*************************   文件系统   *********************************************/
-	//挂载文件系统
-#if USE_SPI_FLASH
-	result = f_mount(&fs,"1:",1);
-#else
-  result = f_mount(&fs,"0:",1);  
-#endif //#if USE_SPI_FLASH
-  
-	printf("\r\nf_mount result=%d \r\n",result);
-	
-	//如果文件系统挂载失败就停机
-	if(result != FR_OK)
-	{
-		while(1);
-	}
+  //烧录文件    
+   burn_file_sd2flash(burn_data,AUX_MAX_NUM);  
 
-/**************************  新宋体25.xbf  *****************************************/		
-#if XBF_XINSONGTI25
-#if USE_SPI_FLASH
-	result = f_open(&fnew,"1:新宋体25.xbf",FA_OPEN_EXISTING | FA_READ);
-#else
-  result = f_open(&fnew,"0:新宋体25.xbf",FA_OPEN_EXISTING | FA_READ);
-#endif  //#if USE_SPI_FLASH
-  
-	printf("f_open 新宋体25.xbf res=%d\n",result);
-	if(result==FR_OK)
-  {
-	  write_addr=60*4096;
-	  for(j=0;j<649;j++)//擦除扇区，起始位置60*4096共2596KB
-	  {
-	   	SPI_FLASH_SectorErase(write_addr+j*4096);
-	  }
-	  j=0;
-	  write_addr=60*4096;
-	  while(result == FR_OK) 
-	  {
-		  result = f_read( &fnew, tempbuf, 256, &bw);//读取数据	 
-		  if(result!=FR_OK)break;			 //执行错误  
-		  SPI_FLASH_PageWrite(tempbuf,write_addr,256);  //拷贝数据到外部flash上    
-		  write_addr+=256;				
-		  j++;
-		  if(bw !=256)break;
-	  } 
-  }
-	f_close(&fnew);
-	
-	SPI_FLASH_BufferRead(tempbuf,60*4096,100);			//读取数据，打印验证
-	printf("readbuf 新宋体25.xbf\n");
-	for(j=0;j<100;j++)
-		printf("%X",tempbuf[j]);
-	printf("\n如果tempbuf不全为 FF ，那么说明字库拷贝成功！！！\n");
-	if((tempbuf[0]!=0xff)&&(tempbuf[1]!=0xff))LED1_ON;
-#endif  //#if XBF_XINSONGTI25
-/**************************  END 新宋体25.xbf  *****************************************/  
-  
-  
+   while(1);
 
-/**************************  新宋体19.xbf  *****************************************/		
-#if XBF_XINSONGTI19
-#if USE_SPI_FLASH
-	result = f_open(&fnew,"1:新宋体19.xbf",FA_OPEN_EXISTING | FA_READ);
-#else
-  result = f_open(&fnew,"0:新宋体19.xbf",FA_OPEN_EXISTING | FA_READ);
-#endif  //#if USE_SPI_FLASH
-  
-	printf("f_open 新宋体19.xbf res=%d\n",result);
-	if(result==FR_OK)
-  {
-	  write_addr=710*4096;
-	  for(j=0;j<529;j++)//擦除扇区，起始位置710*4096共2116KB
-	  {
-	   	SPI_FLASH_SectorErase(write_addr+j*4096);
-	  }
-	  j=0;
-	  write_addr=710*4096;
-	  while(result == FR_OK) 
-	  {
-		  result = f_read( &fnew, tempbuf, 256, &bw);//读取数据	 
-		  if(result!=FR_OK)break;			 //执行错误  
-		  SPI_FLASH_PageWrite(tempbuf,write_addr,256);  //拷贝数据到外部flash上    
-		  write_addr+=256;				
-		  j++;
-		  if(bw !=256)break;
-	  } 
-  }
-	f_close(&fnew);
-	
-	SPI_FLASH_BufferRead(tempbuf,710*4096,100);			//读取数据，打印验证
-	printf("readbuf 新宋体19.xbf\n");
-	for(j=0;j<100;j++)
-		printf("%X",tempbuf[j]);
-	printf("\n如果tempbuf不全为 FF ，那么说明字库拷贝成功！！！\n");
-	if((tempbuf[0]!=0xff)&&(tempbuf[1]!=0xff))LED2_ON;
-#endif  //#if XBF_XINSONGTI19
-/**************************  END 新宋体19.xbf  *****************************************/ 
-  
-
-
-/**************************  UNIGBK.BIN  *****************************************/		
-#if UNIGBK
-#if USE_SPI_FLASH
-	result = f_open(&fnew,"1:UNIGBK.BIN",FA_OPEN_EXISTING | FA_READ);
-#else
-  result = f_open(&fnew,"0:UNIGBK.BIN",FA_OPEN_EXISTING | FA_READ);
-#endif  //#if USE_SPI_FLASH
-  
-	printf("f_open UNIGBK.BIN res=%d\n",result);
-	if(result==FR_OK)
-  {
-	  write_addr=1240*4096;
-	  for(j=0;j<43;j++)//擦除扇区，起始位置1240*4096共172KB
-	  {
-	   	SPI_FLASH_SectorErase(write_addr+j*4096);
-	  }
-	  j=0;
-	  write_addr=1240*4096;
-	  while(result == FR_OK) 
-	  {
-		  result = f_read( &fnew, tempbuf, 256, &bw);//读取数据	 
-		  if(result!=FR_OK)break;			 //执行错误  
-		  SPI_FLASH_PageWrite(tempbuf,write_addr,256);  //拷贝数据到外部flash上    
-		  write_addr+=256;				
-		  j++;
-		  if(bw !=256)break;
-	  } 
-  }
-	f_close(&fnew);
-	
-	SPI_FLASH_BufferRead(tempbuf,1240*4096+174344/2,100);			//读取数据，打印验证
-	printf("readbuf UNIGBK.BIN\n");
-	for(j=0;j<100;j++)
-		printf("%X",tempbuf[j]);
-	printf("\n如果tempbuf不全为 FF ，那么说明字库拷贝成功！！！\n");
-	if((tempbuf[0]!=0xff)&&(tempbuf[1]!=0xff))LED3_ON;
-#endif  //#if UNIGBK
-/**************************  END UNIGBK.BIN  *****************************************/  
-  
-  
-/**************************  GB2312_H2424.FON  ***************************************/		
-#if GB2312
-#if USE_SPI_FLASH
-	result = f_open(&fnew,"1:GB2312_H2424.FON",FA_OPEN_EXISTING | FA_READ);
-#else
-  result = f_open(&fnew,"0:GB2312_H2424.FON",FA_OPEN_EXISTING | FA_READ);
-#endif  //#if USE_SPI_FLASH
-  
-	printf("f_open HZLIB.bin res=%d\n",result);
-	if(result==FR_OK)
-  {
-	  write_addr=1360*4096;
-	  for(j=0;j<144;j++)//擦除扇区，起始位1360*4096共576KB
-	  {
-	   	SPI_FLASH_SectorErase(write_addr+j*4096);
-	  }
-	  j=0;
-	  write_addr=1360*4096;
-	  while(result == FR_OK) 
-	  {
-		  result = f_read( &fnew, tempbuf, 256, &bw);//读取数据	 
-		  if(result!=FR_OK)break;			 //执行错误  
-		  SPI_FLASH_PageWrite(tempbuf,write_addr,256);  //拷贝数据到外部flash上    
-		  write_addr+=256;				
-		  j++;
-		  if(bw !=256)break;
-	  } 
-  }
-	f_close(&fnew);
-	
-	SPI_FLASH_BufferRead(tempbuf,1360*4096,100);			//读取数据，打印验证
-	printf("readbuf HZLIB.bin\n");
-	for(j=0;j<100;j++)
-		printf("%X",tempbuf[j]);
-	printf("\n如果tempbuf不全为 FF ，那么说明字库拷贝成功！！！\n");
-	if((tempbuf[0]!=0xff)&&(tempbuf[1]!=0xff))LED3_ON;
-#endif  //#if GB2312
-/**************************  END GB2312_H2424.FON  **************************************/  
-  
-
-/**************************  sd8782_uapsta.bin  *****************************************/		
-#if SD8782
-#if USE_SPI_FLASH
-	result = f_open(&fnew,"1:sd8782_uapsta.bin",FA_OPEN_EXISTING | FA_READ);
-#else
-  result = f_open(&fnew,"0:sd8782_uapsta.bin",FA_OPEN_EXISTING | FA_READ);
-#endif  //#if USE_SPI_FLASH
-  
-	printf("f_open sd8782_uapsta.bin res=%d\n",result);
-	if(result==FR_OK)
-  {
-	  write_addr=1290*4096;
-	  for(j=0;j<61;j++)//擦除扇区，起始位置1300*4096共244KB
-	  {
-	   	SPI_FLASH_SectorErase(write_addr+j*4096);
-	  }
-	  j=0;
-	  write_addr=1290*4096;
-	  while(result == FR_OK) 
-	  {
-		  result = f_read( &fnew, tempbuf, 256, &bw);//读取数据	 
-		  if(result!=FR_OK)break;			 //执行错误  
-		  SPI_FLASH_PageWrite(tempbuf,write_addr,256);  //拷贝数据到外部flash上    
-		  write_addr+=256;				
-		  j++;
-		  if(bw !=256)break;
-	  } 
-  }
-	f_close(&fnew);
-	
-	SPI_FLASH_BufferRead(tempbuf,1290*4096,100);			//读取数据，打印验证
-	printf("readbuf sd8782_uapsta.bin\n");
-	for(j=0;j<100;j++)
-		printf("%X",tempbuf[j]);
-	printf("\n如果tempbuf不全为 FF ，那么说明字库拷贝成功！！！\n");
-	if((tempbuf[0]!=0xff)&&(tempbuf[1]!=0xff))LED3_ON;
-#endif  //#if SD8782
-/**************************  END sd8782_uapsta.bin  *****************************************/  
-  
-		
-	//不再使用文件系统，取消挂载文件系统
-#if USE_SPI_FLASH
-	result = f_mount(NULL,"1:",1);
-#else
-  result = f_mount(NULL,"0:",1);
-#endif
-	while(1)
-	{
-	}
 
 }
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

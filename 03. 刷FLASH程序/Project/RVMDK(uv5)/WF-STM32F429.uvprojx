@@ -363,7 +363,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
             <v6LangP>0</v6LangP>
@@ -373,7 +373,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F429_439xx,USE_STDPERIPH_DRIVER,</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Libraries\CMSIS\Device\ST\STM32F4xx\Include;..\..\Libraries\STM32F4xx_StdPeriph_Driver\inc;..\..\USER;..\..\USER\FATFS</IncludePath>
+              <IncludePath>..\..\Libraries\CMSIS\Device\ST\STM32F4xx\Include;..\..\Libraries\STM32F4xx_StdPeriph_Driver\inc;..\..\USER;..\..\USER\FATFS;..\..\USER\Bsp</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -698,6 +698,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\USER\stm32f4xx_it.c</FilePath>
             </File>
+            <File>
+              <FileName>aux_data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\USER\aux_data.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -742,6 +747,16 @@
               <FileName>cc936.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\USER\FATFS\option\cc936.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>DOC</GroupName>
+          <Files>
+            <File>
+              <FileName>必读说明.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\必读说明.txt</FilePath>
             </File>
           </Files>
         </Group>

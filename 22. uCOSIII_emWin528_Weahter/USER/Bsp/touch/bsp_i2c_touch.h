@@ -3,6 +3,10 @@
 
 #include "stm32f4xx.h"
 
+/*使用软件IIC，把SOFT_IIC宏设置为1，硬件IIC则设置为0
+!!使用硬件IIC时非常容易出现错误，不推荐*/
+#define SOFT_IIC      1
+
 /* STM32 I2C 快速模式 */
 #define I2C_Speed                        400000
 
@@ -48,15 +52,27 @@
 
 #define GTP_RST_GPIO_PORT                GPIOD
 #define GTP_RST_GPIO_CLK                 RCC_AHB1Periph_GPIOD
-#define GTP_RST_GPIO_PIN                 GPIO_Pin_13
+#define GTP_RST_GPIO_PIN                 GPIO_Pin_11
 
 #define GTP_INT_GPIO_PORT                GPIOD
 #define GTP_INT_GPIO_CLK                 RCC_AHB1Periph_GPIOD
-#define GTP_INT_GPIO_PIN                 GPIO_Pin_12
-#define GTP_INT_READ()                   GPIO_ReadInputDataBit(GPIOD,GPIO_Pin_12)
+#define GTP_INT_GPIO_PIN                 GPIO_Pin_13
+#define GTP_INT_READ()                   GPIO_ReadInputDataBit(GPIOD,GPIO_Pin_13)
 
 //#define GTP_INT_EXTI_PORTSOURCE          EXTI_PortSourceGPIOD
 //#define GTP_INT_EXTI_PINSOURCE           EXTI_PinSource12
+
+
+
+
+//软件IIC使用的宏
+#define I2C_SCL_1()  GPIO_SetBits(GTP_I2C_SCL_GPIO_PORT, GTP_I2C_SCL_PIN)		/* SCL = 1 */
+#define I2C_SCL_0()  GPIO_ResetBits(GTP_I2C_SCL_GPIO_PORT, GTP_I2C_SCL_PIN)		/* SCL = 0 */
+
+#define I2C_SDA_1()  GPIO_SetBits(GTP_I2C_SDA_GPIO_PORT, GTP_I2C_SDA_PIN)		/* SDA = 1 */
+#define I2C_SDA_0()  GPIO_ResetBits(GTP_I2C_SDA_GPIO_PORT, GTP_I2C_SDA_PIN)		/* SDA = 0 */
+
+#define I2C_SDA_READ()  GPIO_ReadInputDataBit(GTP_I2C_SDA_GPIO_PORT, GTP_I2C_SDA_PIN)	/* 读SDA口线状态 */
 
 
 static uint32_t I2C_TIMEOUT_UserCallback(void);

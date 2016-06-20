@@ -24,7 +24,7 @@
   ±ü»ğF429ÖÁ×ğ°æ              2015/11/12
 
 
-ÂÛÌ³    :http://www.chuxue123.com
+ÂÛÌ³    :http://www.firebbs.cn
 ÌÔ±¦    :http://firestm32.taobao.com
 ÓÊÏä	:wildfireteam@163.com
 
@@ -32,6 +32,6 @@
 
 Wildfire STM32 ISO development board program. 
 
-forum    :http://www.chuxue123.com
+forum    :http://www.firebbs.cn
 shop	 :http://firestm32.taobao.com
 email	 :wildfireteam@163.com

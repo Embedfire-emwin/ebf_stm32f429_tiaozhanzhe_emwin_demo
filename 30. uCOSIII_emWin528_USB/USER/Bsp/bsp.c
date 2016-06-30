@@ -406,7 +406,7 @@ void  BSP_Init (void)
   rtc_time.RTC_Date.RTC_Year    =15;
   
   OSSchedLock(&err);
-  if(RTC_CheckAndConfig(&rtc_time,1)==1)  bsp_result |=BSP_RTC;//使用外部晶振为RTC时钟源
+  if(RTC_CheckAndConfig(&rtc_time,0)==1)  bsp_result |=BSP_RTC;//使用外部晶振为RTC时钟源
   OSSchedUnlock(&err);
 }
 

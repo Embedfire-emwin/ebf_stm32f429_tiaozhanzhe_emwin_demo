@@ -52,7 +52,7 @@ static uint8_t RTC_Config(uint8_t flag)
     /* Wait till LSI is ready */  
     while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET)
     {
-      Delay(100);
+      Delay(1000);
       count++;
       if(count>4000)return 1;
     }
@@ -96,10 +96,11 @@ uint8_t RTC_CheckAndConfig(RTC_TIME *rtc_time,uint8_t flag)
 {
   RTC_InitTypeDef RTC_InitStructure;
   
+  /* RTC configuration  */
+  if(RTC_Config(flag)==1)return 1;
+  
   if (RTC_ReadBackupRegister(RTC_BKP_DR0) != 0x32F2)
-  {
-    /* RTC configuration  */
-    if(RTC_Config(flag)==1)return 1;
+  {      
     
     /* Configure the RTC data register and RTC prescaler */
     RTC_InitStructure.RTC_AsynchPrediv = 0x7F;

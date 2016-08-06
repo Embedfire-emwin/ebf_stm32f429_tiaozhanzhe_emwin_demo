@@ -23,6 +23,8 @@
 #include "app.h"
 #include "DIALOG.h"
 #include "./Bsp/ov2640/bsp_ov2640.h"
+#include "./Bsp/ov5640/bsp_ov5640.h"
+#include "./Bsp/ov5640/ov5640_AF.h"
 // USER END
 
 /*********************************************************************
@@ -43,8 +45,13 @@
 **********************************************************************
 */
 
+
+
 // USER START (Optionally insert additional static data)
-OV2640_IDTypeDef OV2640_Camera_ID;
+
+
+CAMERA_SENSOR camera_sensor = OV2640;  
+
 // USER END
 
 
@@ -89,10 +96,13 @@ void cbCameraWin(WM_MESSAGE * pMsg)
 *
 *       CreateCamera
 */
+
 void FUN_ICON7Clicked(void)
 {
   OS_ERR  err;
   WM_HWIN hWin;
+  OV2640_IDTypeDef OV2640_Camera_ID;
+  
   OS_INFO("CameraDLG create\n");
   
   hWin = WM_CreateWindowAsChild(0,0,800,480,HDTWIN,WM_CF_SHOW,cbCameraWin,0);
@@ -105,43 +115,102 @@ void FUN_ICON7Clicked(void)
   OV2640_ReadID(&OV2640_Camera_ID);
   if(OV2640_Camera_ID.PIDH  == 0x26)
   {
+    camera_sensor = OV2640;
     bsp_result &=~BSP_CAMERA;
   }
   else
   {
-    bsp_result |= BSP_CAMERA;
-  }
+    OV5640_IDTypeDef OV5640_Camera_ID;
+    
+    OV5640_HW_Init();   
+
+    /* 读取摄像头芯片ID，确定摄像头正常连接 */
+    OV5640_ReadID(&OV5640_Camera_ID);
+
+    if(OV5640_Camera_ID.PIDH  == 0x56)
+    {
+        camera_sensor = OV5640;
+        bsp_result &=~BSP_CAMERA;    
+    }    
+    else
+    {
+      bsp_result |= BSP_CAMERA;
+    }  
   
-  if(bsp_result&BSP_CAMERA)
-  {    
-    GUI_Delay(100);    
-    ErrorDialog(hWin,"Camera Error","camera drvice cannot work!");
-    while(1)
-    {
-      if(tpad_flag)WM_DeleteWindow(hWin);
-       if(!Flag_ICON7)return;
-       GUI_Delay(10);
+  }
+
+  if(camera_sensor == OV2640)
+  {
+  
+    if(bsp_result&BSP_CAMERA)
+    {    
+      GUI_Delay(100);    
+      ErrorDialog(hWin,"Camera Error","camera drvice cannot work!");
+      while(1)
+      {
+        if(tpad_flag)WM_DeleteWindow(hWin);
+         if(!Flag_ICON7)return;
+         GUI_Delay(10);
+      }
+    }
+    LCD_LayerInit(0);
+    OV2640_QVGAConfig(); 
+    OV2640_Init();   
+    DCMI_Cmd(ENABLE); 
+    DCMI_CaptureCmd(ENABLE); 
+    OSSchedLock(&err);
+    while(Flag_ICON7)
+    {     
+      if(TPAD_Scan(0))//GetPinStateOfKey2()==1)
+      {
+        LCD_BL_OFF();   
+        OV2640_Stop();
+        LCD_LayerInit(1); 
+        OSSchedUnlock(&err);
+        BEEP_ON;              
+        WM_DeleteWindow(hWin);      
+      }
     }
   }
-  LCD_LayerInit(0);
-  OV2640_QVGAConfig(); 
-  OV2640_Init();   
-  DCMI_Cmd(ENABLE); 
-  DCMI_CaptureCmd(ENABLE); 
-  OSSchedLock(&err);
-  while(Flag_ICON7)
-  {     
-    if(TPAD_Scan(0))//GetPinStateOfKey2()==1)
-    {
-      LCD_BL_OFF();   
-      OV2640_Stop();
-      LCD_LayerInit(1); 
-      OSSchedUnlock(&err);
-      BEEP_ON;              
-      WM_DeleteWindow(hWin);      
-    }
+  else if(camera_sensor == OV5640)
+  {
+    if(bsp_result&BSP_CAMERA)
+      {    
+        GUI_Delay(100);    
+        ErrorDialog(hWin,"Camera Error","camera drvice cannot work!");
+        while(1)
+        {
+          if(tpad_flag)WM_DeleteWindow(hWin);
+           if(!Flag_ICON7)return;
+           GUI_Delay(10);
+        }
+      }
+      LCD_LayerInit(0);
+      OV5640_Init();
+      
+      OV5640_RGB565Config();
+      OV5640_AUTO_FOCUS();
+      
+      //使能DCMI采集数据
+      DCMI_Cmd(ENABLE); 
+      DCMI_CaptureCmd(ENABLE);
+      OSSchedLock(&err);
+      while(Flag_ICON7)
+      {     
+        if(TPAD_Scan(0))//GetPinStateOfKey2()==1)
+        {
+          LCD_BL_OFF();   
+          OV5640_Stop();
+          LCD_LayerInit(1); 
+          OSSchedUnlock(&err);
+          BEEP_ON;              
+          WM_DeleteWindow(hWin);      
+        }
+      }
+  
   }
 }
+
 
 // USER START (Optionally insert additional public code)
 // USER END

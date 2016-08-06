@@ -818,6 +818,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\USER\Bsp\adc\bsp_adc.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_ov5640.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\USER\Bsp\ov5640\bsp_ov5640.c</FilePath>
+            </File>
+            <File>
+              <FileName>ov5640_AF.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\USER\Bsp\ov5640\ov5640_AF.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

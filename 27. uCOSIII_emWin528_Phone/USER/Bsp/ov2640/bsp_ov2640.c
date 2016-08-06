@@ -28,7 +28,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "./Bsp/ov2640/bsp_ov2640.h"
+#include "./Bsp/ov5640/bsp_ov5640.h"
 #include "./Bsp/key/bsp_key.h"
+
 /** @addtogroup STM32F4xx_StdPeriph_Examples
   * @{
   */
@@ -457,6 +459,15 @@ void OV2640_Init()
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);  
   DMA_ITConfig(DMA2_Stream1,DMA_IT_TC,ENABLE);//开启传输完成中断
+  
+  
+   	/* 配置帧中断，接收到帧同步信号就进入中断 */
+	NVIC_InitStructure.NVIC_IRQChannel = DCMI_IRQn ;	//帧中断
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority =0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	DCMI_ITConfig (DCMI_IT_FRAME,ENABLE);	
 }
 
 //dma_memory 以16位数据为单位， dma_bufsize以32位数据为单位(即像素个数/2)
@@ -481,14 +492,14 @@ void OV2640_DMA_Config(uint32_t DMA_Memory0BaseAddr,uint32_t DMA_BufferSize)
   DMA_InitStructure.DMA_Priority = DMA_Priority_High;
   DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
   DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
-  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_INC4;
-  DMA_InitStructure.DMA_PeripheralBurst = DMA_MemoryBurst_INC4;    
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_INC8;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;    
   /* DMA2 IRQ channel Configuration */
   DMA_Init(DMA2_Stream1, &DMA_InitStructure);
   DMA_Cmd(DMA2_Stream1,ENABLE);
   while(DMA_GetCmdStatus(DMA2_Stream1) != ENABLE){}
 }
-static uint16_t buffer_flag =1;
+uint16_t buffer_flag =1;
 void OV2640_Stop(void)
 {  
   DCMI_CaptureCmd(DISABLE);//DCMI捕获使关闭		
@@ -512,11 +523,31 @@ void DMA2_Stream1_IRQHandler(void)
   {
     buffer_flag++;
     if(buffer_flag==(LCD_PIXEL_HEIGHT+1))buffer_flag=1;
-    OV2640_DMA_Config(FSMC_LCD_ADDRESS+(LCD_PIXEL_WIDTH*2*(LCD_PIXEL_HEIGHT-buffer_flag)),LCD_PIXEL_WIDTH/2);
+    
+    if(camera_sensor == OV2640)
+    {
+        OV2640_DMA_Config(FSMC_LCD_ADDRESS+(LCD_PIXEL_WIDTH*2*(LCD_PIXEL_HEIGHT-buffer_flag)),LCD_PIXEL_WIDTH/2);
+    }
+    else if(camera_sensor == OV5640)
+    {      
+        OV5640_DMA_Config(FSMC_LCD_ADDRESS+(LCD_PIXEL_WIDTH*2*(LCD_PIXEL_HEIGHT-buffer_flag)),LCD_PIXEL_WIDTH/2);
+    }
     DMA_ClearITPendingBit(DMA2_Stream1,DMA_IT_TCIF1);
   }
 }
+//共同使用
+//使用帧中断重置line_num,可防止有时掉数据的时候DMA传送行数出现偏移
+void DCMI_IRQHandler(void)
+{
 
+	if(  DCMI_GetITStatus (DCMI_IT_FRAME) == SET )    
+	{
+		/*传输完一帧，计数复位*/
+		buffer_flag=1;
+		
+		DCMI_ClearITPendingBit(DCMI_IT_FRAME); 
+	}
+}
 
 //设置图像输出大小
 //OV2640输出图像的大小(分辨率),完全由改函数确定

@@ -25,7 +25,7 @@
 
 
 ¬€Ã≥    :http://www.firebbs.cn
-Ã‘±¶    :http://firestm32.taobao.com
+Ã‘±¶    :https://fire-stm32.taobao.com
 ” œ‰	:wildfireteam@163.com
 
 
@@ -33,5 +33,5 @@
 Wildfire STM32 ISO development board program. 
 
 forum    :http://www.firebbs.cn
-shop	 :http://firestm32.taobao.com
+shop	 :https://fire-stm32.taobao.com
 email	 :wildfireteam@163.com

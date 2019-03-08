@@ -90,6 +90,9 @@ DSTATUS TM_FATFS_FLASH_SPI_disk_initialize(void)
   SPI_InitStructure.SPI_CRCPolynomial = 7;
   SPI_Init(FLASH_SPI, &SPI_InitStructure);
 
+  /* Disable FLASH_SPI  */
+  SPI_Cmd(FLASH_SPI, DISABLE);
+	
   /* Enable FLASH_SPI  */
   SPI_Cmd(FLASH_SPI, ENABLE);
 
@@ -98,6 +101,9 @@ DSTATUS TM_FATFS_FLASH_SPI_disk_initialize(void)
 	
 	SPI_Flash_WAKEUP();
 	
+	/* 使 SPI_FLASH 进入 4 字节地址模式 */
+	SPI_FLASH_Mode_Init();
+	
 	return TM_FATFS_FLASH_SPI_disk_status();
 
 }
@@ -105,7 +111,7 @@ DSTATUS TM_FATFS_FLASH_SPI_disk_initialize(void)
 DSTATUS TM_FATFS_FLASH_SPI_disk_status(void)
 {
 	FLASH_DEBUG_FUNC();
-	if(sFLASH_ID == SPI_FLASH_ReadID())			/*检测FLASH是否正常工作*/
+	if(sFLASH_ID2 == SPI_FLASH_ReadID())			/*检测FLASH是否正常工作*/
 	{
 		return TM_FATFS_FLASH_SPI_Stat &= ~STA_NOINIT;	/* Clear STA_NOINIT flag */
 	}else
@@ -121,7 +127,7 @@ DRESULT TM_FATFS_FLASH_SPI_disk_ioctl(BYTE cmd, char *buff)
 	  FLASH_DEBUG_FUNC();
 	switch (cmd) {
 		case GET_SECTOR_COUNT:
-			*(DWORD * )buff = 2560;		//sector数量   1536
+			*(DWORD * )buff = 4096;		//sector数量   
 		break;
 		case GET_SECTOR_SIZE :     // Get R/W sector size (WORD)
 
@@ -143,7 +149,7 @@ DRESULT TM_FATFS_FLASH_SPI_disk_read(BYTE *buff, DWORD sector, UINT count)
 	{
 		return RES_NOTRDY;
 	}
-	sector+=1536;//扇区偏移，外部Flash文件系统空间放在外部Flash后面6M空间
+	sector+=4096;//扇区偏移，外部Flash文件系统空间放在外部Flash后面16M空间
 	SPI_FLASH_BufferRead(buff, sector <<12, count<<12);
 	return RES_OK;
 }
@@ -152,7 +158,7 @@ DRESULT TM_FATFS_FLASH_SPI_disk_write(BYTE *buff, DWORD sector, UINT count)
 {
 	uint32_t write_addr;  
 	FLASH_DEBUG_FUNC();
-	sector+=1536;//扇区偏移，外部Flash文件系统空间放在外部Flash后面6M空间
+	sector+=4096;//扇区偏移，外部Flash文件系统空间放在外部Flash后面16M空间
 	write_addr = sector<<12;    
 	SPI_FLASH_SectorErase(write_addr);
 	SPI_FLASH_BufferWrite(buff,write_addr,4096);
@@ -176,13 +182,15 @@ void SPI_FLASH_SectorErase(u32 SectorAddr)
   SPI_FLASH_CS_LOW();
   /* Send Sector Erase instruction */
   SPI_FLASH_SendByte(W25X_SectorErase);
-  /* Send SectorAddr high nibble address byte */
+  /*发送擦除扇区地址的高8位*/
+  SPI_FLASH_SendByte((SectorAddr & 0xFF000000) >> 24);
+  /*发送擦除扇区地址的中前8位*/
   SPI_FLASH_SendByte((SectorAddr & 0xFF0000) >> 16);
-  /* Send SectorAddr medium nibble address byte */
+  /* 发送擦除扇区地址的中后8位 */
   SPI_FLASH_SendByte((SectorAddr & 0xFF00) >> 8);
-  /* Send SectorAddr low nibble address byte */
+  /* 发送擦除扇区地址的低8位 */
   SPI_FLASH_SendByte(SectorAddr & 0xFF);
-  /* Deselect the FLASH: Chip Select high */
+  /* 停止信号 FLASH: CS 高电平 */
   SPI_FLASH_CS_HIGH();
   /* Wait the end of Flash writing */
   SPI_FLASH_WaitForWriteEnd();
@@ -234,11 +242,13 @@ void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
   SPI_FLASH_CS_LOW();
   /* Send "Write to Memory " instruction */
   SPI_FLASH_SendByte(W25X_PageProgram);
-  /* Send WriteAddr high nibble address byte to write to */
+  /*发送写地址的高8位*/
+  SPI_FLASH_SendByte((WriteAddr & 0xFF000000) >> 24);
+  /*发送写地址的中前8位*/
   SPI_FLASH_SendByte((WriteAddr & 0xFF0000) >> 16);
-  /* Send WriteAddr medium nibble address byte to write to */
+  /*发送写地址的中后8位*/
   SPI_FLASH_SendByte((WriteAddr & 0xFF00) >> 8);
-  /* Send WriteAddr low nibble address byte to write to */
+  /*发送写地址的低8位*/
   SPI_FLASH_SendByte(WriteAddr & 0xFF);
 
   if(NumByteToWrite > SPI_FLASH_PerWritePageSize)
@@ -363,11 +373,13 @@ void SPI_FLASH_BufferRead(u8* pBuffer, u32 ReadAddr, uint32_t NumByteToRead)
   /* Send "Read from Memory " instruction */
   SPI_FLASH_SendByte(W25X_ReadData);
 
-  /* Send ReadAddr high nibble address byte to read from */
+  /* 发送 读 地址高8位 */
+  SPI_FLASH_SendByte((ReadAddr & 0xFF000000) >> 24);
+  /* 发送 读 地址中前8位 */
   SPI_FLASH_SendByte((ReadAddr & 0xFF0000) >> 16);
-  /* Send ReadAddr medium nibble address byte to read from */
+  /* 发送 读 地址中后8位 */
   SPI_FLASH_SendByte((ReadAddr& 0xFF00) >> 8);
-  /* Send ReadAddr low nibble address byte to read from */
+  /* 发送 读 地址低8位 */
   SPI_FLASH_SendByte(ReadAddr & 0xFF);
 
   while (NumByteToRead--) /* while there is data to be read */
@@ -650,6 +662,38 @@ void SPI_Flash_WAKEUP(void)
   SPI_FLASH_CS_HIGH();                   //等待TRES1
 }   
 
+ /**
+  * @brief  使 SPI_FLASH 进入 4 字节地址模式
+  * @param  none
+  * @retval none
+  */
+void SPI_FLASH_Mode_Init(void)
+{
+	uint8_t Temp;
+	
+	/*选择 FLASH: CS 低 */
+	SPI_FLASH_CS_LOW();
+	
+	/* 发送状态寄存器 3 命令 */
+	SPI_FLASH_SendByte(W25X_ReadStatusRegister3); 
+	
+	Temp = SPI_FLASH_SendByte(Dummy_Byte);
+	
+	/* 停止信号 FLASH: CS 高 */
+	SPI_FLASH_CS_HIGH();
+	
+	if((Temp&0x01) == 0)
+	{
+		/*选择 FLASH: CS 低 */
+		SPI_FLASH_CS_LOW();
+		
+		/* 进入4字节模式 */
+		SPI_FLASH_SendByte(W25X_Enter4ByteMode);
+		
+		/* 停止信号 FLASH: CS 高 */
+		SPI_FLASH_CS_HIGH();
+	}
+}
 
 #ifdef  USB_SPI_TIMEOUT
 /**

@@ -200,7 +200,6 @@ void  BSP_Init (void)
 	/* 挂载文件系统 -- SPI FLASH */
   f_mount(&fs[1],"1:",1);	/* Mount a logical drive */
 
-
   WM_SetCreateFlags(WM_CF_MEMDEV);
 
 	/* 初始化LCD及emWin */

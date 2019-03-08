@@ -97,9 +97,9 @@ extern uint16_t bsp_result;
 #define   BSP_CAMERA          (uint16_t)0x1000        /*  (13) The Camera cannot work                 */
 
 /*------------------- BL8782_PDN   -------------------------*/
-#define WIFI_PDN_PIN                  GPIO_Pin_9                 
-#define WIFI_PDN_GPIO_PORT            GPIOG                      
-#define WIFI_PDN_GPIO_CLK             RCC_AHB1Periph_GPIOG
+#define WIFI_PDN_PIN                  GPIO_Pin_13                
+#define WIFI_PDN_GPIO_PORT            GPIOB                      
+#define WIFI_PDN_GPIO_CLK             RCC_AHB1Periph_GPIOB
 #define WIFI_PDN_ENABLE()             GPIO_SetBits(WIFI_PDN_GPIO_PORT,WIFI_PDN_PIN)
 #define WIFI_PDN_DISABLE()            GPIO_ResetBits(WIFI_PDN_GPIO_PORT,WIFI_PDN_PIN)  
 /*

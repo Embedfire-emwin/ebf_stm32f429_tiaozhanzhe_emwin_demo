@@ -88,9 +88,9 @@
 //#define DCMI_PWDN_PINSOURCE        	     GPIO_PinSource3
 //#define DCMI_PWDN_AF			               GPIO_AF_DCMI
 
-#define DCMI_RST_GPIO_PORT        	     GPIOG
-#define DCMI_RST_GPIO_CLK         	     RCC_AHB1Periph_GPIOG
-#define DCMI_RST_GPIO_PIN         	     GPIO_Pin_2
+#define DCMI_RST_GPIO_PORT        	     GPIOB
+#define DCMI_RST_GPIO_CLK         	     RCC_AHB1Periph_GPIOB
+#define DCMI_RST_GPIO_PIN         	     GPIO_Pin_5
 
 //数据信号线
 #define DCMI_D0_GPIO_PORT        	       GPIOH

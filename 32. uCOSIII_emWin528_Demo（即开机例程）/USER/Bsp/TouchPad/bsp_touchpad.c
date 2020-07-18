@@ -18,7 +18,7 @@
 #include "./Bsp/usart/bsp_debug_usart.h"
 #include  "./Bsp/bsp.h"
 
-#define TPAD_ARR_MAX_VAL 	0XFFFFFFFF	//定时器最大计数值
+#define TPAD_ARR_MAX_VAL 	0XFFFFF	//定时器最大计数值
 
 volatile uint32_t tpad_default_val=0;//保存没按下时定时器计数值
 
